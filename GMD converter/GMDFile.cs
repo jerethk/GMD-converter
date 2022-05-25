@@ -7,12 +7,12 @@ namespace GMD_converter
 {
     class GMDFile
     {
-        public int      fileType { get; set; }           // 'MIDI' 0x4d 49 44 49
-        public int      fileSize { get; set; }            // excluding header
+        public int fileType { get; set; }           // 'MIDI' 0x4d 49 44 49
+        public int fileSize { get; set; }            // excluding header
 
         public MDpgChunk MDpg { get; set; }
         public MThdChunk MThd { get; set; }
-        public MTrk[]    tracks { get; set; }
+        public MTrk[] tracks { get; set; }
 
         private static int reverseInt32Endian(int input)
         {
@@ -61,7 +61,7 @@ namespace GMD_converter
                         MDpg.content = new byte[MDpg.chunkSize];
                         MDpg.content = GMDReader.ReadBytes(MDpg.chunkSize);
                     }
-                    else 
+                    else
                         return false;
 
                     // MThd chunk next
@@ -75,12 +75,12 @@ namespace GMD_converter
                         MThd.nTracks = reverseInt16Endian(GMDReader.ReadInt16());
                         MThd.division = reverseInt16Endian(GMDReader.ReadInt16());
                     }
-                    else 
+                    else
                         return false;
 
                     // Tracks
                     this.tracks = new MTrk[MThd.nTracks];
-                    
+
                     for (int t = 0; t < MThd.nTracks; t++)
                     {
                         this.tracks[t] = new MTrk();
@@ -106,9 +106,82 @@ namespace GMD_converter
                     return false;
                 }
             }
-            
+
             return true;
         }
+
+        // Export to single format 2 MIDI file with multiple tracks
+        public bool exportMIDI2(string fname)
+        {
+            using (BinaryWriter MIDWriter = new BinaryWriter(new FileStream(fname, FileMode.Create))) 
+            {
+                short MIDIformat = 02;
+                
+                try
+                {
+                    MIDWriter.Write(MThd.chunkType);
+                    MIDWriter.Write(reverseInt32Endian(MThd.chunkSize));
+                    MIDWriter.Write(reverseInt16Endian(MIDIformat));
+                    MIDWriter.Write(reverseInt16Endian(MThd.nTracks));
+                    MIDWriter.Write(reverseInt16Endian(MThd.division));
+
+                    // tracks
+                    foreach (MTrk t in this.tracks)
+                    {
+                        MIDWriter.Write(t.heading);
+                        MIDWriter.Write(reverseInt32Endian(t.trkLength));
+                        MIDWriter.Write(t.data);
+                    }
+                }
+                catch (IOException e)
+                {
+                    string errorString = e.Message;
+                    return false;
+                }
+
+                MIDWriter.Close();
+            }
+
+            return true;
+        }
+
+        // Export to multiple format 0 MIDI files
+        public bool exportMIDI0(string fname)
+        {
+            string path = Path.GetDirectoryName(fname) + "\\" + Path.GetFileNameWithoutExtension(fname);
+            short MIDIformat = 00;
+            
+            for (int t = 0; t < tracks.Length; t++)
+            {
+                string filename = path + t + ".MID";
+
+                using (BinaryWriter MIDWriter = new BinaryWriter(new FileStream(filename, FileMode.Create)))
+                {
+                    try
+                    {
+                        MIDWriter.Write(MThd.chunkType);
+                        MIDWriter.Write(reverseInt32Endian(MThd.chunkSize));
+                        MIDWriter.Write(reverseInt16Endian(MIDIformat));
+                        MIDWriter.Write(reverseInt16Endian(1));
+                        MIDWriter.Write(reverseInt16Endian(MThd.division));
+
+                        MIDWriter.Write(tracks[t].heading);
+                        MIDWriter.Write(reverseInt32Endian(tracks[t].trkLength));
+                        MIDWriter.Write(tracks[t].data);
+                    }
+                    catch (IOException e)
+                    {
+                        string errorString = e.Message;
+                        return false;
+                    }
+
+                    MIDWriter.Close();
+                }
+            }
+
+            return true;
+        }
+
     }
 
     class MDpgChunk

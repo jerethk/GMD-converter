@@ -30,7 +30,7 @@ namespace GMD_converter
         private void InitializeComponent()
         {
             this.openGMDDg = new System.Windows.Forms.OpenFileDialog();
-            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.saveMIDDg = new System.Windows.Forms.SaveFileDialog();
             this.btnLoadGMD = new System.Windows.Forms.Button();
             this.labelGMDInfo = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -43,8 +43,16 @@ namespace GMD_converter
             // 
             // openGMDDg
             // 
+            this.openGMDDg.DefaultExt = "gmd";
             this.openGMDDg.Filter = "GMD Files|*.GMD";
             this.openGMDDg.Title = "Load GMD file";
+            // 
+            // saveMIDDg
+            // 
+            this.saveMIDDg.DefaultExt = "mid";
+            this.saveMIDDg.Filter = "MIDI files|*.mid";
+            this.saveMIDDg.Title = "Save MIDI ";
+            this.saveMIDDg.FileOk += new System.ComponentModel.CancelEventHandler(this.saveMIDDg_FileOk);
             // 
             // btnLoadGMD
             // 
@@ -78,7 +86,7 @@ namespace GMD_converter
             // 
             this.radioBMultitrack.AutoSize = true;
             this.radioBMultitrack.Checked = true;
-            this.radioBMultitrack.Location = new System.Drawing.Point(6, 22);
+            this.radioBMultitrack.Location = new System.Drawing.Point(7, 32);
             this.radioBMultitrack.Name = "radioBMultitrack";
             this.radioBMultitrack.Size = new System.Drawing.Size(187, 19);
             this.radioBMultitrack.TabIndex = 3;
@@ -116,6 +124,7 @@ namespace GMD_converter
             this.btnExport.TabIndex = 5;
             this.btnExport.Text = "Export to MIDI";
             this.btnExport.UseVisualStyleBackColor = true;
+            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
             // 
             // Form1
             // 
@@ -127,6 +136,7 @@ namespace GMD_converter
             this.Controls.Add(this.label1);
             this.Controls.Add(this.labelGMDInfo);
             this.Controls.Add(this.btnLoadGMD);
+            this.MinimumSize = new System.Drawing.Size(600, 440);
             this.Name = "Form1";
             this.Text = "GMD to MID converter";
             this.groupBox1.ResumeLayout(false);
@@ -139,7 +149,7 @@ namespace GMD_converter
         #endregion
 
         private System.Windows.Forms.OpenFileDialog openGMDDg;
-        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private System.Windows.Forms.SaveFileDialog saveMIDDg;
         private System.Windows.Forms.Button btnLoadGMD;
         private System.Windows.Forms.Label labelGMDInfo;
         private System.Windows.Forms.Label label1;

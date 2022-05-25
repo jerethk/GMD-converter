@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace GMD_converter
 {
@@ -32,17 +33,19 @@ namespace GMD_converter
                     this.GMID = g;
 
                     labelGMDInfo.Text = openGMDDg.FileName;
-                    labelGMDInfo.Text += $"\nGMD size {GMID.fileSize}";
+                    // labelGMDInfo.Text += $"\nGMD size {GMID.fileSize}";
                     labelGMDInfo.Text += $"\nMDPg size {GMID.MDpg.chunkSize}";
-                    labelGMDInfo.Text += $"\nMThd size {GMID.MThd.chunkSize}";
+                    // labelGMDInfo.Text += $"\nMThd size {GMID.MThd.chunkSize}";
                     labelGMDInfo.Text += $"\nMIDI format {GMID.MThd.format}";
                     labelGMDInfo.Text += $"\nNumber of tracks {GMID.MThd.nTracks}";
                     labelGMDInfo.Text += $"\nDivision {GMID.MThd.division}";
                     labelGMDInfo.Text += $"\n";
 
+                    int tracknum = 0;
                     foreach (MTrk track in GMID.tracks)
                     {
-                        labelGMDInfo.Text += $"\nTrack length {track.trkLength}";
+                        tracknum++;
+                        labelGMDInfo.Text += $"\nTrack {tracknum} length {track.trkLength}";
                     }
 
                     btnExport.Enabled = true;
@@ -51,6 +54,38 @@ namespace GMD_converter
                 {
                     MessageBox.Show("Error loading GMD", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+
+        }
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            string filename = Path.GetFileNameWithoutExtension(openGMDDg.FileName);
+            saveMIDDg.FileName = filename;
+            
+            saveMIDDg.ShowDialog();
+        }
+
+        private void saveMIDDg_FileOk(object sender, CancelEventArgs e)
+        {
+            bool isSuccess = false;
+            
+            if (radioBMultitrack.Checked)
+            {
+                isSuccess = GMID.exportMIDI2(saveMIDDg.FileName);
+            }
+            else if (radioBSingletracks.Checked)
+            {
+                isSuccess = GMID.exportMIDI0(saveMIDDg.FileName);
+            }
+
+            if (isSuccess)
+            {
+                MessageBox.Show("Successfully exported");
+            }
+            else
+            {
+                MessageBox.Show("Failed to export");
             }
 
         }
