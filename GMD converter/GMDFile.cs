@@ -7,7 +7,7 @@ namespace GMD_converter
 {
     class GMDFile
     {
-        public int fileType { get; set; }           // 'MIDI' 0x4d 49 44 49
+        public int fileType { get; set; }           // 'MIDI' 0x4d 49 44 49   or 'GMD '
         public int fileSize { get; set; }            // excluding header
 
         public MDpgChunk MDpg { get; set; }
@@ -50,7 +50,7 @@ namespace GMD_converter
                 {
                     // GMD Header                    
                     this.fileType = GMDReader.ReadInt32();
-                    if (this.fileType != 0x4944494D)
+                    if (this.fileType != 0x4944494D && this.fileType != 0x20444d47)
                     {
                         errorString = "Not a valid GMD file";
                         return false;    // wrong file type
@@ -170,7 +170,7 @@ namespace GMD_converter
             
             for (int t = 0; t < tracks.Length; t++)
             {
-                string filename = path + t + ".MID";
+                string filename = path + '_' + t + ".MID";
 
                 using (BinaryWriter MIDWriter = new BinaryWriter(new FileStream(filename, FileMode.Create)))
                 {

@@ -44,7 +44,7 @@ namespace GMD_converter
             // openGMDDg
             // 
             this.openGMDDg.DefaultExt = "gmd";
-            this.openGMDDg.Filter = "GMD Files|*.GMD";
+            this.openGMDDg.Filter = "GMD Files|*.GMD;*.GMID";
             this.openGMDDg.Title = "Load GMD file";
             // 
             // saveMIDDg
