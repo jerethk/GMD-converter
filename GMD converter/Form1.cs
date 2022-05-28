@@ -27,14 +27,15 @@ namespace GMD_converter
             if (dialogResult == DialogResult.OK)
             {
                 GMDFile g = new GMDFile();
-                
-                if (g.loadFile(openGMDDg.FileName))
+                string errorMsg = "";
+
+                if (g.loadFile(openGMDDg.FileName, out errorMsg))
                 {
                     this.GMID = g;
 
                     labelGMDInfo.Text = openGMDDg.FileName;
                     // labelGMDInfo.Text += $"\nGMD size {GMID.fileSize}";
-                    labelGMDInfo.Text += $"\nMDPg size {GMID.MDpg.chunkSize}";
+                    if (GMID.MDpg != null) labelGMDInfo.Text += $"\nMDPg size {GMID.MDpg.chunkSize} bytes";
                     // labelGMDInfo.Text += $"\nMThd size {GMID.MThd.chunkSize}";
                     labelGMDInfo.Text += $"\nMIDI format {GMID.MThd.format}";
                     labelGMDInfo.Text += $"\nNumber of tracks {GMID.MThd.nTracks}";
@@ -45,14 +46,14 @@ namespace GMD_converter
                     foreach (MTrk track in GMID.tracks)
                     {
                         tracknum++;
-                        labelGMDInfo.Text += $"\nTrack {tracknum} length {track.trkLength}";
+                        labelGMDInfo.Text += $"\nTrack {tracknum} length {track.trkLength} bytes";
                     }
 
                     btnExport.Enabled = true;
                 }
                 else
                 {
-                    MessageBox.Show("Error loading GMD", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Error loading GMD \n {errorMsg}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 

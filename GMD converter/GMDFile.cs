@@ -40,43 +40,59 @@ namespace GMD_converter
             return output;
         }
 
-        public bool loadFile(string filename)
+        public bool loadFile(string filename, out string errorString)
         {
             using (BinaryReader GMDReader = new BinaryReader(new FileStream(filename, FileMode.Open)))
             {
+                errorString = "";
+                
                 try
                 {
+                    // GMD Header                    
                     this.fileType = GMDReader.ReadInt32();
-                    if (this.fileType != 0x4944494D) return false;    // wrong file type
+                    if (this.fileType != 0x4944494D)
+                    {
+                        errorString = "Not a valid GMD file";
+                        return false;    // wrong file type
+                    }
+                        
                     this.fileSize = reverseInt32Endian(GMDReader.ReadInt32());
 
-                    // MDpg chunk should come first
-                    MDpg = new MDpgChunk();
-                    MDpg.chunkType = GMDReader.ReadInt32();
-
-                    if (MDpg.chunkType == 0x6770444d)
+                    bool isMThd = false;
+                    while (!isMThd)
                     {
-                        MDpg.chunkSize = reverseInt32Endian(GMDReader.ReadInt32());
+                        int nextChunkType = GMDReader.ReadInt32();
 
-                        MDpg.content = new byte[MDpg.chunkSize];
-                        MDpg.content = GMDReader.ReadBytes(MDpg.chunkSize);
+                        if (nextChunkType == 0x6770444d)        // MDpg
+                        {
+                            // MDpg chunk
+                            MDpg = new MDpgChunk();
+                            MDpg.chunkType = nextChunkType;
+                            MDpg.chunkSize = reverseInt32Endian(GMDReader.ReadInt32());
+
+                            MDpg.content = new byte[MDpg.chunkSize];
+                            MDpg.content = GMDReader.ReadBytes(MDpg.chunkSize);
+                        }
+                        else if (nextChunkType == 0x6468544d)   // MThd
+                        {
+                            isMThd = true;
+                        }
+                        else
+                        {
+                            // Other chunk type - skip over
+                            int otherChunkSize = reverseInt32Endian(GMDReader.ReadInt32());
+                            GMDReader.ReadBytes(otherChunkSize);
+                        }
                     }
-                    else
-                        return false;
 
-                    // MThd chunk next
+                    // MThd chunk 
                     MThd = new MThdChunk();
-                    MThd.chunkType = GMDReader.ReadInt32();
+                    MThd.chunkType = 0x6468544d;
 
-                    if (MThd.chunkType == 0x6468544d)
-                    {
-                        MThd.chunkSize = reverseInt32Endian(GMDReader.ReadInt32());
-                        MThd.format = reverseInt16Endian(GMDReader.ReadInt16());
-                        MThd.nTracks = reverseInt16Endian(GMDReader.ReadInt16());
-                        MThd.division = reverseInt16Endian(GMDReader.ReadInt16());
-                    }
-                    else
-                        return false;
+                    MThd.chunkSize = reverseInt32Endian(GMDReader.ReadInt32());
+                    MThd.format = reverseInt16Endian(GMDReader.ReadInt16());
+                    MThd.nTracks = reverseInt16Endian(GMDReader.ReadInt16());
+                    MThd.division = reverseInt16Endian(GMDReader.ReadInt16());
 
                     // Tracks
                     this.tracks = new MTrk[MThd.nTracks];
@@ -88,6 +104,7 @@ namespace GMD_converter
 
                         if (this.tracks[t].heading != 0x6b72544d)
                         {
+                            errorString = "Error loading MTrk";
                             return false;
                         }
                         else
@@ -102,7 +119,7 @@ namespace GMD_converter
                 }
                 catch (IOException e)
                 {
-                    string errorString = e.Message;
+                    errorString = "Exception: " + e.Message;
                     return false;
                 }
             }
