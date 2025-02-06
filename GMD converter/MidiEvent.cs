@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace GMD_converter
 {
@@ -16,7 +14,7 @@ namespace GMD_converter
         /// Parses MIDI variable length values.
         /// These are between 1 and 4 bytes.
         /// The first 7 bits of each byte are used to hold value.
-        /// The 8th bit is cleared to indicate the final byte.
+        /// The 8th bit is 0 to indicate the final byte else it is 1.
         /// </summary>
         /// <param name="buf">Bytes</param>
         /// <returns>Tuple: length, number of bytes used to represent the length</returns>
@@ -52,7 +50,7 @@ namespace GMD_converter
     {
         // Format is 0XFF, Type, Length, Data
 
-        public byte Start { get; set; } // 0xFF
+        public byte Start => 0xFF;
 
         public byte Type { get; set; }
 

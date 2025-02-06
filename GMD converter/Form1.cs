@@ -101,6 +101,7 @@ namespace GMD_converter
             if (this.GMID != null && GMID.tracks.Length > 0)
             {
                 var infoWindow = new TrackInfoWindow(GMID.tracks);
+                infoWindow.ShowDialog();
             }
         }
     }
