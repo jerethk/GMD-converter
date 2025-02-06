@@ -61,16 +61,21 @@ namespace GMD_converter
 
         private void btnExport_Click(object sender, EventArgs e)
         {
+            if (this.GMID == null || this.GMID.tracks.Length == 0)
+            { 
+                return;
+            }
+            
             string filename = Path.GetFileNameWithoutExtension(openGMDDg.FileName);
             saveMIDDg.FileName = filename;
-            
+
             saveMIDDg.ShowDialog();
         }
 
         private void saveMIDDg_FileOk(object sender, CancelEventArgs e)
         {
             bool isSuccess = false;
-            
+
             if (radioBMultitrack.Checked)
             {
                 isSuccess = GMID.ExportMIDI2(saveMIDDg.FileName);
@@ -89,6 +94,14 @@ namespace GMD_converter
                 MessageBox.Show("Failed to export");
             }
 
+        }
+
+        private void btnInfo_Click(object sender, EventArgs e)
+        {
+            if (this.GMID != null && GMID.tracks.Length > 0)
+            {
+                var infoWindow = new TrackInfoWindow(GMID.tracks);
+            }
         }
     }
 }

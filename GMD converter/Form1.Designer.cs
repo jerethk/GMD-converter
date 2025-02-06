@@ -29,121 +29,133 @@ namespace GMD_converter
         /// </summary>
         private void InitializeComponent()
         {
-            this.openGMDDg = new System.Windows.Forms.OpenFileDialog();
-            this.saveMIDDg = new System.Windows.Forms.SaveFileDialog();
-            this.btnLoadGMD = new System.Windows.Forms.Button();
-            this.labelGMDInfo = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.radioBMultitrack = new System.Windows.Forms.RadioButton();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.radioBSingletracks = new System.Windows.Forms.RadioButton();
-            this.btnExport = new System.Windows.Forms.Button();
-            this.groupBox1.SuspendLayout();
-            this.SuspendLayout();
+            openGMDDg = new System.Windows.Forms.OpenFileDialog();
+            saveMIDDg = new System.Windows.Forms.SaveFileDialog();
+            btnLoadGMD = new System.Windows.Forms.Button();
+            labelGMDInfo = new System.Windows.Forms.Label();
+            label1 = new System.Windows.Forms.Label();
+            radioBMultitrack = new System.Windows.Forms.RadioButton();
+            groupBox1 = new System.Windows.Forms.GroupBox();
+            radioBSingletracks = new System.Windows.Forms.RadioButton();
+            btnExport = new System.Windows.Forms.Button();
+            btnInfo = new System.Windows.Forms.Button();
+            groupBox1.SuspendLayout();
+            SuspendLayout();
             // 
             // openGMDDg
             // 
-            this.openGMDDg.DefaultExt = "gmd";
-            this.openGMDDg.Filter = "GMD Files|*.GMD;*.GMID";
-            this.openGMDDg.Title = "Load GMD file";
+            openGMDDg.DefaultExt = "gmd";
+            openGMDDg.Filter = "GMD Files|*.GMD;*.GMID";
+            openGMDDg.Title = "Load GMD file";
             // 
             // saveMIDDg
             // 
-            this.saveMIDDg.DefaultExt = "mid";
-            this.saveMIDDg.Filter = "MIDI files|*.mid";
-            this.saveMIDDg.Title = "Save MIDI ";
-            this.saveMIDDg.FileOk += new System.ComponentModel.CancelEventHandler(this.saveMIDDg_FileOk);
+            saveMIDDg.DefaultExt = "mid";
+            saveMIDDg.Filter = "MIDI files|*.mid";
+            saveMIDDg.Title = "Save MIDI ";
+            saveMIDDg.FileOk += saveMIDDg_FileOk;
             // 
             // btnLoadGMD
             // 
-            this.btnLoadGMD.Location = new System.Drawing.Point(12, 22);
-            this.btnLoadGMD.Name = "btnLoadGMD";
-            this.btnLoadGMD.Size = new System.Drawing.Size(103, 37);
-            this.btnLoadGMD.TabIndex = 0;
-            this.btnLoadGMD.Text = "Load GMD";
-            this.btnLoadGMD.UseVisualStyleBackColor = true;
-            this.btnLoadGMD.Click += new System.EventHandler(this.btnLoadGMD_Click);
+            btnLoadGMD.Location = new System.Drawing.Point(12, 22);
+            btnLoadGMD.Name = "btnLoadGMD";
+            btnLoadGMD.Size = new System.Drawing.Size(103, 37);
+            btnLoadGMD.TabIndex = 0;
+            btnLoadGMD.Text = "Load GMD";
+            btnLoadGMD.UseVisualStyleBackColor = true;
+            btnLoadGMD.Click += btnLoadGMD_Click;
             // 
             // labelGMDInfo
             // 
-            this.labelGMDInfo.AutoSize = true;
-            this.labelGMDInfo.Location = new System.Drawing.Point(12, 188);
-            this.labelGMDInfo.Name = "labelGMDInfo";
-            this.labelGMDInfo.Size = new System.Drawing.Size(92, 15);
-            this.labelGMDInfo.TabIndex = 1;
-            this.labelGMDInfo.Text = "No GMD loaded";
+            labelGMDInfo.AutoSize = true;
+            labelGMDInfo.Location = new System.Drawing.Point(12, 188);
+            labelGMDInfo.Name = "labelGMDInfo";
+            labelGMDInfo.Size = new System.Drawing.Size(92, 15);
+            labelGMDInfo.TabIndex = 1;
+            labelGMDInfo.Text = "No GMD loaded";
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 160);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(103, 15);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "GMD information:";
+            label1.AutoSize = true;
+            label1.Location = new System.Drawing.Point(12, 160);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(103, 15);
+            label1.TabIndex = 2;
+            label1.Text = "GMD information:";
             // 
             // radioBMultitrack
             // 
-            this.radioBMultitrack.AutoSize = true;
-            this.radioBMultitrack.Checked = true;
-            this.radioBMultitrack.Location = new System.Drawing.Point(7, 32);
-            this.radioBMultitrack.Name = "radioBMultitrack";
-            this.radioBMultitrack.Size = new System.Drawing.Size(187, 19);
-            this.radioBMultitrack.TabIndex = 3;
-            this.radioBMultitrack.TabStop = true;
-            this.radioBMultitrack.Text = "Format 2 MIDI (multi track file)";
-            this.radioBMultitrack.UseVisualStyleBackColor = true;
+            radioBMultitrack.AutoSize = true;
+            radioBMultitrack.Checked = true;
+            radioBMultitrack.Location = new System.Drawing.Point(7, 32);
+            radioBMultitrack.Name = "radioBMultitrack";
+            radioBMultitrack.Size = new System.Drawing.Size(187, 19);
+            radioBMultitrack.TabIndex = 3;
+            radioBMultitrack.TabStop = true;
+            radioBMultitrack.Text = "Format 2 MIDI (multi track file)";
+            radioBMultitrack.UseVisualStyleBackColor = true;
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.radioBSingletracks);
-            this.groupBox1.Controls.Add(this.radioBMultitrack);
-            this.groupBox1.Location = new System.Drawing.Point(171, 22);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(200, 113);
-            this.groupBox1.TabIndex = 4;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Export options";
+            groupBox1.Controls.Add(radioBSingletracks);
+            groupBox1.Controls.Add(radioBMultitrack);
+            groupBox1.Location = new System.Drawing.Point(171, 22);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new System.Drawing.Size(200, 113);
+            groupBox1.TabIndex = 4;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Export options";
             // 
             // radioBSingletracks
             // 
-            this.radioBSingletracks.AutoSize = true;
-            this.radioBSingletracks.Location = new System.Drawing.Point(6, 69);
-            this.radioBSingletracks.Name = "radioBSingletracks";
-            this.radioBSingletracks.Size = new System.Drawing.Size(179, 19);
-            this.radioBSingletracks.TabIndex = 5;
-            this.radioBSingletracks.Text = "Format 0 MIDI (multiple files)";
-            this.radioBSingletracks.UseVisualStyleBackColor = true;
+            radioBSingletracks.AutoSize = true;
+            radioBSingletracks.Location = new System.Drawing.Point(6, 69);
+            radioBSingletracks.Name = "radioBSingletracks";
+            radioBSingletracks.Size = new System.Drawing.Size(179, 19);
+            radioBSingletracks.TabIndex = 5;
+            radioBSingletracks.Text = "Format 0 MIDI (multiple files)";
+            radioBSingletracks.UseVisualStyleBackColor = true;
             // 
             // btnExport
             // 
-            this.btnExport.Enabled = false;
-            this.btnExport.Location = new System.Drawing.Point(424, 22);
-            this.btnExport.Name = "btnExport";
-            this.btnExport.Size = new System.Drawing.Size(103, 37);
-            this.btnExport.TabIndex = 5;
-            this.btnExport.Text = "Export to MIDI";
-            this.btnExport.UseVisualStyleBackColor = true;
-            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+            btnExport.Enabled = true;
+            btnExport.Location = new System.Drawing.Point(424, 22);
+            btnExport.Name = "btnExport";
+            btnExport.Size = new System.Drawing.Size(103, 37);
+            btnExport.TabIndex = 5;
+            btnExport.Text = "Export to MIDI";
+            btnExport.UseVisualStyleBackColor = true;
+            btnExport.Click += btnExport_Click;
+            // 
+            // btnInfo
+            // 
+            btnInfo.Enabled = true;
+            btnInfo.Location = new System.Drawing.Point(424, 73);
+            btnInfo.Name = "btnInfo";
+            btnInfo.Size = new System.Drawing.Size(103, 37);
+            btnInfo.TabIndex = 6;
+            btnInfo.Text = "Track Info";
+            btnInfo.UseVisualStyleBackColor = true;
+            btnInfo.Click += btnInfo_Click;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(591, 407);
-            this.Controls.Add(this.btnExport);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.labelGMDInfo);
-            this.Controls.Add(this.btnLoadGMD);
-            this.MinimumSize = new System.Drawing.Size(600, 440);
-            this.Name = "Form1";
-            this.Text = "GMD to MID converter";
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(591, 407);
+            Controls.Add(btnInfo);
+            Controls.Add(btnExport);
+            Controls.Add(groupBox1);
+            Controls.Add(label1);
+            Controls.Add(labelGMDInfo);
+            Controls.Add(btnLoadGMD);
+            MinimumSize = new System.Drawing.Size(600, 440);
+            Name = "Form1";
+            Text = "GMD to MID converter";
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -157,6 +169,7 @@ namespace GMD_converter
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RadioButton radioBSingletracks;
         private System.Windows.Forms.Button btnExport;
+        private System.Windows.Forms.Button btnInfo;
     }
 }
 
