@@ -19,5 +19,19 @@ namespace GMD_converter
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
         }
+
+        public static void TestMe()
+        {
+            var input = new byte[]
+            {
+                0xc0,
+                0x80,
+                0x80,
+                0x80,
+            };
+
+            var (len, bcount) = MidiEvent.GetLength(input);
+            Console.WriteLine(len);
+        }
     }
 }

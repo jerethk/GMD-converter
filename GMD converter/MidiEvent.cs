@@ -10,9 +10,45 @@ namespace GMD_converter
         public int DeltaTime { get; set; }
 
         public byte[] Data { get; set; }
+
+        
+        /// <summary>
+        /// Parses MIDI variable length values.
+        /// These are between 1 and 4 bytes.
+        /// The first 7 bits of each byte are used to hold value.
+        /// The 8th bit is cleared to indicate the final byte.
+        /// </summary>
+        /// <param name="buf">Bytes</param>
+        /// <returns>Tuple: length, number of bytes used to represent the length</returns>
+        public static (int length, int byteCount) GetLength(byte[] buf)
+        {
+            if (buf.Length == 0)
+            {
+                return (0, 0);
+            }
+
+            var bufSize = Math.Min(buf.Length, 4);
+            int byteCount = 0;
+            int length = 0;
+            
+            for (int i = 0; i < bufSize; i++)
+            {
+                var b = buf[i];
+                byteCount += 1;
+                length <<= 7;
+                length += (b & 0x7f);
+
+                if ((b & 0x80) == 0)
+                {
+                    break;
+                }
+            }
+            
+            return (length, byteCount);
+        }
     }
 
-    public class MetaEvent : MidiEvent
+    public sealed class MetaEvent : MidiEvent
     {
         // Format is 0XFF, Type, Length, Data
 
@@ -23,7 +59,7 @@ namespace GMD_converter
         public int Length { get; set; }
     }
 
-    public class SysExEvent : MidiEvent
+    public sealed class SysExEvent : MidiEvent
     {
         // Format is 0XF0 | 0XF7, Length, Data, End
 
