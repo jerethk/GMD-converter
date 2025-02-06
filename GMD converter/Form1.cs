@@ -29,7 +29,7 @@ namespace GMD_converter
                 GMDFile g = new GMDFile();
                 string errorMsg = "";
 
-                if (g.loadFile(openGMDDg.FileName, out errorMsg))
+                if (g.LoadFile(openGMDDg.FileName, out errorMsg))
                 {
                     this.GMID = g;
 
@@ -73,11 +73,11 @@ namespace GMD_converter
             
             if (radioBMultitrack.Checked)
             {
-                isSuccess = GMID.exportMIDI2(saveMIDDg.FileName);
+                isSuccess = GMID.ExportMIDI2(saveMIDDg.FileName);
             }
             else if (radioBSingletracks.Checked)
             {
-                isSuccess = GMID.exportMIDI0(saveMIDDg.FileName);
+                isSuccess = GMID.ExportMIDI0(saveMIDDg.FileName);
             }
 
             if (isSuccess)

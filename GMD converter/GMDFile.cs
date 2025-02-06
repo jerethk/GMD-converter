@@ -7,13 +7,13 @@ namespace GMD_converter
     public class GMDFile
     {
         public int fileType { get; set; }           // 'MIDI' 0x4d 49 44 49   or 'GMD '
-        public int fileSize { get; set; }            // excluding header
+        public int fileSize { get; set; }           // excluding header
 
-        public MDpgChunk MDpg { get; set; }
+        public MDpgChunk MDpg { get; set; }         // This seems to have no purpose in DF
         public MThdChunk MThd { get; set; }
         public MTrkChunk[] tracks { get; set; }
 
-        private static int reverseInt32Endian(int input)
+        private static int ReverseInt32Endian(int input)
         {
             byte[] inputArray = BitConverter.GetBytes(input);
             byte[] outputArray = new byte[4];
@@ -27,7 +27,7 @@ namespace GMD_converter
             return output;
         }
 
-        private static short reverseInt16Endian(short input)
+        private static short ReverseInt16Endian(short input)
         {
             byte[] inputArray = BitConverter.GetBytes(input);
             byte[] outputArray = new byte[2];
@@ -39,7 +39,7 @@ namespace GMD_converter
             return output;
         }
 
-        public bool loadFile(string filename, out string errorString)
+        public bool LoadFile(string filename, out string errorString)
         {
             using (BinaryReader GMDReader = new BinaryReader(new FileStream(filename, FileMode.Open)))
             {
@@ -55,7 +55,7 @@ namespace GMD_converter
                         return false;    // wrong file type
                     }
                         
-                    this.fileSize = reverseInt32Endian(GMDReader.ReadInt32());
+                    this.fileSize = ReverseInt32Endian(GMDReader.ReadInt32());
 
                     bool isMThd = false;
                     while (!isMThd)
@@ -65,12 +65,11 @@ namespace GMD_converter
                         if (nextChunkType == 0x6770444d)        // MDpg
                         {
                             // MDpg chunk
-                            MDpg = new MDpgChunk();
-                            MDpg.chunkType = nextChunkType;
-                            MDpg.chunkSize = reverseInt32Endian(GMDReader.ReadInt32());
+                            this.MDpg = new MDpgChunk();
+                            this.MDpg.chunkType = nextChunkType;
+                            this.MDpg.chunkSize = ReverseInt32Endian(GMDReader.ReadInt32());
 
-                            MDpg.content = new byte[MDpg.chunkSize];
-                            MDpg.content = GMDReader.ReadBytes(MDpg.chunkSize);
+                            this.MDpg.content = GMDReader.ReadBytes(MDpg.chunkSize);
                         }
                         else if (nextChunkType == 0x6468544d)   // MThd
                         {
@@ -79,19 +78,19 @@ namespace GMD_converter
                         else
                         {
                             // Other chunk type - skip over
-                            int otherChunkSize = reverseInt32Endian(GMDReader.ReadInt32());
+                            int otherChunkSize = ReverseInt32Endian(GMDReader.ReadInt32());
                             GMDReader.ReadBytes(otherChunkSize);
                         }
                     }
 
                     // MThd chunk 
-                    MThd = new MThdChunk();
-                    MThd.chunkType = 0x6468544d;
+                    this.MThd = new MThdChunk();
+                    this.MThd.chunkType = 0x6468544d;
 
-                    MThd.chunkSize = reverseInt32Endian(GMDReader.ReadInt32());
-                    MThd.format = reverseInt16Endian(GMDReader.ReadInt16());
-                    MThd.nTracks = reverseInt16Endian(GMDReader.ReadInt16());
-                    MThd.division = reverseInt16Endian(GMDReader.ReadInt16());
+                    this.MThd.chunkSize = ReverseInt32Endian(GMDReader.ReadInt32());
+                    this.MThd.format = ReverseInt16Endian(GMDReader.ReadInt16());
+                    this.MThd.nTracks = ReverseInt16Endian(GMDReader.ReadInt16());
+                    this.MThd.division = ReverseInt16Endian(GMDReader.ReadInt16());
 
                     // Tracks
                     this.tracks = new MTrkChunk[MThd.nTracks];
@@ -108,8 +107,7 @@ namespace GMD_converter
                         }
                         else
                         {
-                            this.tracks[t].chunkSize = reverseInt32Endian(GMDReader.ReadInt32());
-                            this.tracks[t].data = new byte[this.tracks[t].chunkSize];
+                            this.tracks[t].chunkSize = ReverseInt32Endian(GMDReader.ReadInt32());
                             this.tracks[t].data = GMDReader.ReadBytes(this.tracks[t].chunkSize);
                         }
                     }
@@ -127,7 +125,7 @@ namespace GMD_converter
         }
 
         // Export to single format 2 MIDI file with multiple tracks
-        public bool exportMIDI2(string fname)
+        public bool ExportMIDI2(string fname)
         {
             using (BinaryWriter MIDWriter = new BinaryWriter(new FileStream(fname, FileMode.Create))) 
             {
@@ -136,16 +134,16 @@ namespace GMD_converter
                 try
                 {
                     MIDWriter.Write(MThd.chunkType);
-                    MIDWriter.Write(reverseInt32Endian(MThd.chunkSize));
-                    MIDWriter.Write(reverseInt16Endian(MIDIformat));
-                    MIDWriter.Write(reverseInt16Endian(MThd.nTracks));
-                    MIDWriter.Write(reverseInt16Endian(MThd.division));
+                    MIDWriter.Write(ReverseInt32Endian(MThd.chunkSize));
+                    MIDWriter.Write(ReverseInt16Endian(MIDIformat));
+                    MIDWriter.Write(ReverseInt16Endian(MThd.nTracks));
+                    MIDWriter.Write(ReverseInt16Endian(MThd.division));
 
                     // tracks
                     foreach (MTrkChunk t in this.tracks)
                     {
                         MIDWriter.Write(t.chunkType);
-                        MIDWriter.Write(reverseInt32Endian(t.chunkSize));
+                        MIDWriter.Write(ReverseInt32Endian(t.chunkSize));
                         MIDWriter.Write(t.data);
                     }
                 }
@@ -162,7 +160,7 @@ namespace GMD_converter
         }
 
         // Export to multiple format 0 MIDI files
-        public bool exportMIDI0(string fname)
+        public bool ExportMIDI0(string fname)
         {
             string path = Path.GetDirectoryName(fname) + "\\" + Path.GetFileNameWithoutExtension(fname);
             short MIDIformat = 00;
@@ -176,13 +174,13 @@ namespace GMD_converter
                     try
                     {
                         MIDWriter.Write(MThd.chunkType);
-                        MIDWriter.Write(reverseInt32Endian(MThd.chunkSize));
-                        MIDWriter.Write(reverseInt16Endian(MIDIformat));
-                        MIDWriter.Write(reverseInt16Endian(1));
-                        MIDWriter.Write(reverseInt16Endian(MThd.division));
+                        MIDWriter.Write(ReverseInt32Endian(MThd.chunkSize));
+                        MIDWriter.Write(ReverseInt16Endian(MIDIformat));
+                        MIDWriter.Write(ReverseInt16Endian(1));
+                        MIDWriter.Write(ReverseInt16Endian(MThd.division));
 
                         MIDWriter.Write(tracks[t].chunkType);
-                        MIDWriter.Write(reverseInt32Endian(tracks[t].chunkSize));
+                        MIDWriter.Write(ReverseInt32Endian(tracks[t].chunkSize));
                         MIDWriter.Write(tracks[t].data);
                     }
                     catch (IOException e)
