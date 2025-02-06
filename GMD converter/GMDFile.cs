@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
 namespace GMD_converter
 {
-    class GMDFile
+    public class GMDFile
     {
         public int fileType { get; set; }           // 'MIDI' 0x4d 49 44 49   or 'GMD '
         public int fileSize { get; set; }            // excluding header
 
         public MDpgChunk MDpg { get; set; }
         public MThdChunk MThd { get; set; }
-        public MTrk[] tracks { get; set; }
+        public MTrkChunk[] tracks { get; set; }
 
         private static int reverseInt32Endian(int input)
         {
@@ -95,23 +94,23 @@ namespace GMD_converter
                     MThd.division = reverseInt16Endian(GMDReader.ReadInt16());
 
                     // Tracks
-                    this.tracks = new MTrk[MThd.nTracks];
+                    this.tracks = new MTrkChunk[MThd.nTracks];
 
                     for (int t = 0; t < MThd.nTracks; t++)
                     {
-                        this.tracks[t] = new MTrk();
-                        this.tracks[t].heading = GMDReader.ReadInt32();
+                        this.tracks[t] = new MTrkChunk();
+                        this.tracks[t].chunkType = GMDReader.ReadInt32();
 
-                        if (this.tracks[t].heading != 0x6b72544d)
+                        if (this.tracks[t].chunkType != 0x6b72544d)
                         {
                             errorString = "Error loading MTrk";
                             return false;
                         }
                         else
                         {
-                            this.tracks[t].trkLength = reverseInt32Endian(GMDReader.ReadInt32());
-                            this.tracks[t].data = new byte[this.tracks[t].trkLength];
-                            this.tracks[t].data = GMDReader.ReadBytes(this.tracks[t].trkLength);
+                            this.tracks[t].chunkSize = reverseInt32Endian(GMDReader.ReadInt32());
+                            this.tracks[t].data = new byte[this.tracks[t].chunkSize];
+                            this.tracks[t].data = GMDReader.ReadBytes(this.tracks[t].chunkSize);
                         }
                     }
 
@@ -143,10 +142,10 @@ namespace GMD_converter
                     MIDWriter.Write(reverseInt16Endian(MThd.division));
 
                     // tracks
-                    foreach (MTrk t in this.tracks)
+                    foreach (MTrkChunk t in this.tracks)
                     {
-                        MIDWriter.Write(t.heading);
-                        MIDWriter.Write(reverseInt32Endian(t.trkLength));
+                        MIDWriter.Write(t.chunkType);
+                        MIDWriter.Write(reverseInt32Endian(t.chunkSize));
                         MIDWriter.Write(t.data);
                     }
                 }
@@ -182,8 +181,8 @@ namespace GMD_converter
                         MIDWriter.Write(reverseInt16Endian(1));
                         MIDWriter.Write(reverseInt16Endian(MThd.division));
 
-                        MIDWriter.Write(tracks[t].heading);
-                        MIDWriter.Write(reverseInt32Endian(tracks[t].trkLength));
+                        MIDWriter.Write(tracks[t].chunkType);
+                        MIDWriter.Write(reverseInt32Endian(tracks[t].chunkSize));
                         MIDWriter.Write(tracks[t].data);
                     }
                     catch (IOException e)
@@ -199,29 +198,5 @@ namespace GMD_converter
             return true;
         }
 
-    }
-
-    class MDpgChunk
-    {
-        public int      chunkType { get; set; }          // 'MDpg'  0x4d 44 70 67
-        public int      chunkSize { get; set; }          // excluding header
-        public byte[]   content { get; set; }
-    }
-
-    class MThdChunk
-    {
-        public int      chunkType { get; set; }          // 'MThd' 0x 4d 54 68 64
-        public int      chunkSize { get; set; }          // excluding header
-
-        public short    format { get; set; }
-        public short    nTracks { get; set; }
-        public short    division { get; set; }
-    }
-
-    class MTrk
-    {
-        public int      heading { get; set; }           // 'MTrk' 0x4d 54 72 6b
-        public int      trkLength { get; set; }
-        public byte[]   data { get; set; }
     }
 }

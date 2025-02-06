@@ -43,10 +43,10 @@ namespace GMD_converter
                     labelGMDInfo.Text += $"\n";
 
                     int tracknum = 0;
-                    foreach (MTrk track in GMID.tracks)
+                    foreach (MTrkChunk track in GMID.tracks)
                     {
                         tracknum++;
-                        labelGMDInfo.Text += $"\nTrack {tracknum} length {track.trkLength} bytes";
+                        labelGMDInfo.Text += $"\nTrack {tracknum} length {track.chunkSize} bytes";
                     }
 
                     btnExport.Enabled = true;
