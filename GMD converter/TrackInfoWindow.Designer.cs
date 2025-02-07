@@ -35,6 +35,8 @@
             label2 = new System.Windows.Forms.Label();
             label3 = new System.Windows.Forms.Label();
             listBoxSysExEvents = new System.Windows.Forms.ListBox();
+            listBoxErrors = new System.Windows.Forms.ListBox();
+            label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)numericTrack).BeginInit();
             SuspendLayout();
             // 
@@ -43,15 +45,15 @@
             listBoxMetaEvents.FormattingEnabled = true;
             listBoxMetaEvents.HorizontalScrollbar = true;
             listBoxMetaEvents.ItemHeight = 15;
-            listBoxMetaEvents.Location = new System.Drawing.Point(163, 53);
+            listBoxMetaEvents.Location = new System.Drawing.Point(163, 45);
             listBoxMetaEvents.Name = "listBoxMetaEvents";
-            listBoxMetaEvents.Size = new System.Drawing.Size(447, 469);
+            listBoxMetaEvents.Size = new System.Drawing.Size(447, 454);
             listBoxMetaEvents.TabIndex = 0;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new System.Drawing.Point(163, 25);
+            label1.Location = new System.Drawing.Point(163, 17);
             label1.Name = "label1";
             label1.Size = new System.Drawing.Size(71, 15);
             label1.TabIndex = 1;
@@ -59,7 +61,7 @@
             // 
             // btnExportCsv
             // 
-            btnExportCsv.Location = new System.Drawing.Point(30, 127);
+            btnExportCsv.Location = new System.Drawing.Point(30, 119);
             btnExportCsv.Name = "btnExportCsv";
             btnExportCsv.Size = new System.Drawing.Size(99, 35);
             btnExportCsv.TabIndex = 2;
@@ -68,17 +70,19 @@
             // 
             // numericTrack
             // 
-            numericTrack.Location = new System.Drawing.Point(30, 53);
-            numericTrack.Maximum = new decimal(new int[] { 0, 0, 0, 0 });
+            numericTrack.Location = new System.Drawing.Point(30, 45);
+            numericTrack.Maximum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericTrack.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericTrack.Name = "numericTrack";
             numericTrack.Size = new System.Drawing.Size(99, 23);
             numericTrack.TabIndex = 3;
+            numericTrack.Value = new decimal(new int[] { 1, 0, 0, 0 });
             numericTrack.ValueChanged += numericTrack_ValueChanged;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(30, 25);
+            label2.Location = new System.Drawing.Point(30, 17);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(34, 15);
             label2.TabIndex = 4;
@@ -87,7 +91,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(641, 25);
+            label3.Location = new System.Drawing.Point(641, 17);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(73, 15);
             label3.TabIndex = 6;
@@ -98,16 +102,36 @@
             listBoxSysExEvents.FormattingEnabled = true;
             listBoxSysExEvents.HorizontalScrollbar = true;
             listBoxSysExEvents.ItemHeight = 15;
-            listBoxSysExEvents.Location = new System.Drawing.Point(641, 53);
+            listBoxSysExEvents.Location = new System.Drawing.Point(641, 45);
             listBoxSysExEvents.Name = "listBoxSysExEvents";
-            listBoxSysExEvents.Size = new System.Drawing.Size(438, 469);
+            listBoxSysExEvents.Size = new System.Drawing.Size(491, 454);
             listBoxSysExEvents.TabIndex = 5;
+            // 
+            // listBoxErrors
+            // 
+            listBoxErrors.FormattingEnabled = true;
+            listBoxErrors.ItemHeight = 15;
+            listBoxErrors.Location = new System.Drawing.Point(90, 530);
+            listBoxErrors.Name = "listBoxErrors";
+            listBoxErrors.Size = new System.Drawing.Size(373, 49);
+            listBoxErrors.TabIndex = 7;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new System.Drawing.Point(30, 530);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(37, 15);
+            label4.TabIndex = 8;
+            label4.Text = "Errors";
             // 
             // TrackInfoWindow
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(1112, 548);
+            ClientSize = new System.Drawing.Size(1184, 601);
+            Controls.Add(label4);
+            Controls.Add(listBoxErrors);
             Controls.Add(label3);
             Controls.Add(listBoxSysExEvents);
             Controls.Add(label2);
@@ -115,6 +139,7 @@
             Controls.Add(btnExportCsv);
             Controls.Add(label1);
             Controls.Add(listBoxMetaEvents);
+            MinimumSize = new System.Drawing.Size(1200, 640);
             Name = "TrackInfoWindow";
             Text = "TrackInfoWindow";
             Shown += TrackInfoWindow_Shown;
@@ -132,5 +157,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ListBox listBoxSysExEvents;
+        private System.Windows.Forms.ListBox listBoxErrors;
+        private System.Windows.Forms.Label label4;
     }
 }

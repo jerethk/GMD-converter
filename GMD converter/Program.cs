@@ -30,7 +30,7 @@ namespace GMD_converter
                 0x80,
             };
 
-            var (len, bcount) = MidiEvent.GetLength(input);
+            var (len, bcount) = MidiEvent.GetLength(input, 0);
             Console.WriteLine(len);
         }
     }

@@ -100,7 +100,7 @@ namespace GMD_converter
         {
             if (this.GMID != null && GMID.tracks.Length > 0)
             {
-                var infoWindow = new TrackInfoWindow(GMID.tracks);
+                var infoWindow = new TrackInfoWindow(GMID.tracks, GMID.MThd.division);
                 infoWindow.ShowDialog();
             }
         }

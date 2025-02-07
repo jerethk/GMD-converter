@@ -5,7 +5,9 @@ namespace GMD_converter
 {
     public class MidiEvent
     {
-        public int DeltaTime { get; set; }
+        public int DeltaTime { get; set; }  // in ticks
+
+        public int AbsTimeMsec { get; set; }    // milliseconds, calculated
 
         public byte[] Data { get; set; }
 
@@ -18,20 +20,25 @@ namespace GMD_converter
         /// </summary>
         /// <param name="buf">Bytes</param>
         /// <returns>Tuple: length, number of bytes used to represent the length</returns>
-        public static (int length, int byteCount) GetLength(byte[] buf)
+        public static (int length, int byteCount) GetLength(byte[] buf, int position)
         {
             if (buf.Length == 0)
             {
                 return (0, 0);
             }
 
-            var bufSize = Math.Min(buf.Length, 4);
+            // Position cannot be beyond end of array
+            if (position >= buf.Length)
+            {
+                return (0, 0);
+            }
+
             int byteCount = 0;
             int length = 0;
             
-            for (int i = 0; i < bufSize; i++)
+            for (int i = 0; i < 4; i++)
             {
-                var b = buf[i];
+                var b = buf[position + i];
                 byteCount += 1;
                 length <<= 7;
                 length += (b & 0x7f);
@@ -60,11 +67,12 @@ namespace GMD_converter
     public sealed class SysExEvent : MidiEvent
     {
         // Format is 0XF0 | 0XF7, Length, Data, End
+        // Data starts with manufacturer id (and model?) byte
 
         public byte Start { get; set; } // 0xF0 or 0xF7
 
         public int Length { get; set; }
 
-        public byte End { get; set; } // 0xF7
+        public byte EOX { get; set; } // 0xF7
     }
 }

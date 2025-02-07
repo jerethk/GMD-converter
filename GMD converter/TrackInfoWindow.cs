@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,20 +11,8 @@ namespace GMD_converter
 {
     public partial class TrackInfoWindow : Form
     {
-        struct TrackInternal
-        {
-            public List<MidiEvent> MidiEvents;
-            public List<MetaEvent> MetaEvents;
-            public List<SysExEvent> SysExEvents;
-
-            public TrackInternal()
-            {
-                this.MidiEvents = new();
-                this.MetaEvents = new();
-                this.SysExEvents = new();
-            }
-        }
-
+        private static decimal defaultMilliSecondsPerBeat = 500m;
+        private decimal ticksPerBeat;
         private List<TrackInternal> tracks;
 
         #region Constructors
@@ -35,9 +22,10 @@ namespace GMD_converter
             InitializeComponent();
         }
 
-        public TrackInfoWindow(MTrkChunk[] tracks)
+        public TrackInfoWindow(MTrkChunk[] tracks, int division)
             : this()
         {
+            this.ticksPerBeat = division;
             this.tracks = tracks.Select(track => this.LoadTrack(track)).ToList();
         }
 
@@ -46,21 +34,16 @@ namespace GMD_converter
         private TrackInternal LoadTrack(MTrkChunk track)
         {
             var trackInternal = new TrackInternal();
-            var finished = false;
             var dataPos = 0;
+            var absTime = 0;
+            decimal tempo = defaultMilliSecondsPerBeat;
 
-            while (!finished)
+            while (true)
             {
-                if (dataPos + 4 >= track.data.Length)
-                {
-                    break;
-                }
+                // Get the next event from the data //
 
-                // Get the next event from the data
-                var nextFour = new byte[4];
-                Array.Copy(track.data, dataPos, nextFour, 0, 4);
-
-                var (deltaTime, count) = MidiEvent.GetLength(nextFour);
+                // Delta time
+                var (deltaTime, count) = MidiEvent.GetLength(track.data, dataPos);
                 dataPos += count;
 
                 var nextByte = track.data[dataPos];
@@ -70,6 +53,8 @@ namespace GMD_converter
                     case 0XFF:
                         var mEvt = new MetaEvent();
                         mEvt.DeltaTime = deltaTime;
+                        absTime += this.ToAbsoluteTime(deltaTime, tempo);
+                        mEvt.AbsTimeMsec = absTime;
 
                         // meta event type
                         dataPos++;
@@ -77,8 +62,7 @@ namespace GMD_converter
 
                         // meta event length
                         dataPos++;
-                        Array.Copy(track.data, dataPos, nextFour, 0, 4);
-                        var (lenM, countM) = MidiEvent.GetLength(nextFour);
+                        var (lenM, countM) = MidiEvent.GetLength(track.data, dataPos);
                         mEvt.Length = lenM;
 
                         // meta event data
@@ -87,7 +71,15 @@ namespace GMD_converter
                         Array.Copy(track.data, dataPos, mEvt.Data, 0, mEvt.Length);
 
                         dataPos += mEvt.Length;
-                        trackInternal.MetaEvents.Add(mEvt);
+                        trackInternal.MidiEvents.Add(mEvt);
+
+                        // change tempo if set tempo event
+                        if (mEvt.Type == 0x51)
+                        {
+                            decimal microsecPerBeat = (mEvt.Data[0] << 16) + (mEvt.Data[1] << 8) + (mEvt.Data[2]);
+                            tempo = microsecPerBeat / 1000m;
+                        }
+
                         break;
 
                     // SysEx event
@@ -95,32 +87,43 @@ namespace GMD_converter
                     case 0xF7:
                         var sEvt = new SysExEvent();
                         sEvt.DeltaTime = deltaTime;
+                        absTime += this.ToAbsoluteTime(deltaTime, tempo);
+                        sEvt.AbsTimeMsec = absTime;
 
                         // SysEx event length
                         dataPos++;
-                        Array.Copy(track.data, dataPos, nextFour, 0, 4);
-                        var (lenS, countS) = MidiEvent.GetLength(nextFour);
-                        sEvt.Length = lenS;
+                        var (lenS, countS) = MidiEvent.GetLength(track.data, dataPos);
+                        sEvt.Length = lenS - 1;     // exclude EOX byte
 
-                        // SysEx event data
+                        // SysEx event data (exclude the EOX byte, 0xF7)
                         dataPos += countS;
-                        sEvt.Data = new byte[lenS];
+                        sEvt.Data = new byte[lenS - 1];
                         Array.Copy(track.data, dataPos, sEvt.Data, 0, sEvt.Length);
 
                         // End byte, should be 0xF7
                         dataPos += sEvt.Length;
-                        if (track.data[dataPos - 1] != 0xF7)
+                        sEvt.EOX = track.data[dataPos];
+                        if (sEvt.EOX != 0xF7)
                         {
-                            throw new Exception("Unexpected");
+                            MessageBox.Show($"Error: failed to find EOX marker at position 0x{Convert.ToString(dataPos, 16)}");
+                            throw new Exception("Failed to find EOX");
                         }
+                        dataPos++;
 
-                        trackInternal.SysExEvents.Add(sEvt);
+                        trackInternal.MidiEvents.Add(sEvt);
+
+
+                        //var errorMsg = $"Unexpected end of track at position 0x{Convert.ToString(dataPos, 16)}";
+                        //trackInternal.Errors.Add(errorMsg);
+
                         break;
 
                     // Normal Midi event
                     default:
                         var evt = new MidiEvent();
                         evt.DeltaTime = deltaTime;
+                        absTime += this.ToAbsoluteTime(deltaTime, tempo);
+                        evt.AbsTimeMsec = absTime;
 
                         // Get the message type (80 - E0)
                         var t = nextByte & 0xF0;
@@ -140,6 +143,10 @@ namespace GMD_converter
                             case 0xD0:  // Channel pressure
                                 msgLength = 2;
                                 break;
+                            default:
+                                var errorMsg = $"Unknown event type 0x{Convert.ToString(nextByte, 16)} at position 0x{Convert.ToString(dataPos, 16)}";
+                                trackInternal.Errors.Add(errorMsg);
+                                break;
                         }
 
                         evt.Data = new byte[msgLength];
@@ -148,6 +155,11 @@ namespace GMD_converter
 
                         trackInternal.MidiEvents.Add(evt);
                         break;
+                }
+
+                if (dataPos + 4 > track.data.Length)
+                {
+                    break;
                 }
             }
 
@@ -161,13 +173,13 @@ namespace GMD_converter
                 return;
             }
 
-            this.numericTrack.Maximum = this.tracks.Count - 1;
-            this.DisplayData((int)numericTrack.Value);
+            this.numericTrack.Maximum = this.tracks.Count;
+            this.DisplayData((int)numericTrack.Value - 1);
         }
 
         private void numericTrack_ValueChanged(object sender, EventArgs e)
         {
-            this.DisplayData((int)numericTrack.Value);
+            this.DisplayData((int)numericTrack.Value - 1);
         }
 
         private void DisplayData(int trackNum)
@@ -176,6 +188,7 @@ namespace GMD_converter
             
             listBoxMetaEvents.Items.Clear();
             listBoxSysExEvents.Items.Clear();
+            listBoxErrors.Items.Clear();
             
             var track = this.tracks[trackNum];
             var encoding = new UTF8Encoding();
@@ -184,7 +197,15 @@ namespace GMD_converter
             {
                 foreach (var evt in track.MetaEvents)
                 {
-                    listBoxMetaEvents.Items.Add($"Time {evt.DeltaTime} , Type {evt.Type} , {BitConverter.ToString(evt.Data)} , {encoding.GetString(evt.Data)}");
+                    var time = this.GetTimeString(evt.AbsTimeMsec);
+                    var str = $"Time {time} , Type {Convert.ToString(evt.Type, 16)} , {BitConverter.ToString(evt.Data)}";
+
+                    if (evt.Type == 0x03 || evt.Type == 0x06)
+                    {
+                        str += $" , {encoding.GetString(evt.Data).Trim('\0')}";
+                    }
+
+                    listBoxMetaEvents.Items.Add(str);
                 }
             }
 
@@ -192,9 +213,38 @@ namespace GMD_converter
             {
                 foreach (var evt in track.SysExEvents)
                 {
-                    listBoxSysExEvents.Items.Add($"Time {evt.DeltaTime} , {BitConverter.ToString(evt.Data)} , {encoding.GetString(evt.Data)}");
+                    var time = this.GetTimeString(evt.AbsTimeMsec);
+
+                    // Strip off the manufacturer & model bytes and the EOX byte (0xF7)
+                    var msg = new byte[evt.Data.Length - 2];
+                    Array.Copy(evt.Data, 2, msg, 0, msg.Length);
+                    var msgString = encoding.GetString(msg).Trim('\0');
+                    listBoxSysExEvents.Items.Add($"Time {time} , {msgString} , {BitConverter.ToString(evt.Data)}");
                 }
             }
+
+            if (track.Errors != null)
+            {
+                foreach (var error in track.Errors)
+                {
+                    listBoxErrors.Items.Add(error);
+                }
+            }
+        }
+
+        private int ToAbsoluteTime(int ticks, decimal millisecPerBeat)
+        {
+            decimal beats = ticks / this.ticksPerBeat;
+            decimal millisec = beats * millisecPerBeat;
+            return (int)millisec;
+        }
+
+        private string GetTimeString(int millisec)
+        {
+            decimal minutes = Math.Floor(millisec / 60000m);
+            decimal secondsRemaining = Math.Floor((millisec % 60000m) / 1000);
+            decimal milliSecondsReamining = millisec % 1000m;
+            return $"{minutes}:{secondsRemaining}:{milliSecondsReamining}";
         }
     }
 }
