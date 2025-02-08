@@ -37,6 +37,7 @@
             listBoxSysExEvents = new System.Windows.Forms.ListBox();
             listBoxErrors = new System.Windows.Forms.ListBox();
             label4 = new System.Windows.Forms.Label();
+            saveCsvDialog = new System.Windows.Forms.SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)numericTrack).BeginInit();
             SuspendLayout();
             // 
@@ -67,6 +68,7 @@
             btnExportCsv.TabIndex = 2;
             btnExportCsv.Text = "To CSV";
             btnExportCsv.UseVisualStyleBackColor = true;
+            btnExportCsv.Click += btnExportCsv_Click;
             // 
             // numericTrack
             // 
@@ -125,6 +127,11 @@
             label4.TabIndex = 8;
             label4.Text = "Errors";
             // 
+            // saveCsvDialog
+            // 
+            saveCsvDialog.DefaultExt = "csv";
+            saveCsvDialog.Title = "Save CSV";
+            // 
             // TrackInfoWindow
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -159,5 +166,6 @@
         private System.Windows.Forms.ListBox listBoxSysExEvents;
         private System.Windows.Forms.ListBox listBoxErrors;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.SaveFileDialog saveCsvDialog;
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -185,11 +186,11 @@ namespace GMD_converter
         private void DisplayData(int trackNum)
         {
             if (this.tracks.Count <= trackNum) { return; }
-            
+
             listBoxMetaEvents.Items.Clear();
             listBoxSysExEvents.Items.Clear();
             listBoxErrors.Items.Clear();
-            
+
             var track = this.tracks[trackNum];
             var encoding = new UTF8Encoding();
 
@@ -245,6 +246,31 @@ namespace GMD_converter
             decimal secondsRemaining = Math.Floor((millisec % 60000m) / 1000);
             decimal milliSecondsReamining = millisec % 1000m;
             return $"{minutes}:{secondsRemaining}:{milliSecondsReamining}";
+        }
+
+        private void btnExportCsv_Click(object sender, EventArgs e)
+        {
+            var dialogResult = this.saveCsvDialog.ShowDialog(this);
+
+            if (dialogResult == DialogResult.OK)
+            {
+                using var writer = new StreamWriter(File.Create(this.saveCsvDialog.FileName));
+
+                writer.WriteLine($"Track {this.numericTrack.Value}");
+                writer.WriteLine(string.Empty);
+                writer.WriteLine("Meta Events");
+                foreach (var evt in this.listBoxMetaEvents.Items)
+                {
+                    writer.WriteLine(evt as string);
+                }
+
+                writer.WriteLine(string.Empty);
+                writer.WriteLine("System Exclusive Events");
+                foreach (var evt in this.listBoxSysExEvents.Items)
+                {
+                    writer.WriteLine(evt as string);
+                }
+            }
         }
     }
 }
