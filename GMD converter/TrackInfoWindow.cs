@@ -158,7 +158,8 @@ namespace GMD_converter
                         break;
                 }
 
-                if (dataPos + 4 > track.data.Length)
+                // Hack to account for dodgy track endings i.e. STALK-04
+                if (dataPos + 2 >= track.data.Length)
                 {
                     break;
                 }
@@ -201,7 +202,7 @@ namespace GMD_converter
                     var time = this.GetTimeString(evt.AbsTimeMsec);
                     var str = $"Time {time} , Type {Convert.ToString(evt.Type, 16)} , {BitConverter.ToString(evt.Data)}";
 
-                    if (evt.Type == 0x03 || evt.Type == 0x06)
+                    if (evt.Type >= 0x01 && evt.Type <= 0x07)
                     {
                         str += $" , {encoding.GetString(evt.Data).Trim('\0')}";
                     }
